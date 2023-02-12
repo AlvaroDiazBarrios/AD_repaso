@@ -1,0 +1,57 @@
+#+title: Apuntes
+
+* Triggers
+Formato básico de un trigger:
+
+create or replace trigger *nombreDelTrigger*
+{before | after | instead of} *eventoDeDisparo*
+[declare]
+begin
+end;
+
+** Triggers de tablas
+Son triggers que están asociado a una tabla y su sintaxis es la siguiente
+
+create or replace trigger *nombreDelTrigger*
+{before | after} {delete | insert | update} [of <listaColumnas>] on *nombreTabla*
+[for each row]
+[declare]
+begin
+end;
+
+*** Valores new y old
+Sólo se puden hacer referecias a los valores new y old usando *for each row*
+
+*** Multiples eventos de disparo y predicados condicionales
+Como un disparador puede ser lanzado por múltiples eventos tenemos los siguientes
+predicados para filtrar:
+
+- *insterting*: devuelve true si esta insertando false si no
+- *deleting*: devuelve true si esta borrando o false si no
+- *updating* devuelve true si esta actualizando o false si no
+- *updating ('nombreColumna')*: lo mismo que updating pero de una columna concreta
+** Triggers de sustitución
+Son triggers que están asociados a una vista,
+portanto podríamos simular que hacemos cambios sobre una vista cuando en realidad
+los estamos haciendo sobre las tablas que afectan a la vista.
+Su sintaxis es la siguiente:
+
+create or replace trigger *nombreDelTrigger*
+insetad of {delete | insert | update} [of <listaColumnas>] on *nombreVista*
+[for each row]
+[declare]
+begin
+end;
+
+** Triggers de sistemas
+Son triggers que se activan cuando ocurre un evento de sistema la sintaxis es la siguiente:
+
+create or replace trigger *nombreDelTrigger*
+{before | after} <listaEventosDelSistema> [of <listaColumnas>] on *nombreTabla*
+[for each row]
+[declare]
+begin
+end;
+
+Donde los eventos pueden ser los siguientes:
+ver página 316 del libro, 317 del pdf
