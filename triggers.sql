@@ -466,3 +466,123 @@ begin
  delete from emple
  where emp_no = num_emple;
 end t2_4;
+
+--3
+--vista
+create view v3(cliente, desc_producto, fecha_venta, unidades, precio_unitario, subtotal) as
+ select c.nombre, p.descripcion, v.fecha, v.unidades, p.precio_uni, v.unidades * p.precio_uni
+ from clientes c, ventas v, productos p
+ where c.nif = v.nif and v.cod_producto = p.cod_producto;
+
+--3_1
+create or replace trigger t3_1
+instead of insert on v3
+for each row
+declare
+ nif_cli clientes.nif%type;
+ cod_pro productos.cod_producto%type;
+begin
+ select nif into nif_cli from clientes
+ where nombre = :new.cliente;
+
+ select cod_producto into cod_pro from productos
+ where descripcion = :new.desc_producto;
+
+ insert into ventas values(nif_cli, cod_pro, sysdate, :new.unidades);
+
+end;
+
+drop trigger t3_1;
+
+--3_2
+create or replace trigger t3_2
+instead of delete on v3
+for each row
+declare
+ nif_cli clientes.nif%type;
+ cod_pro productos.cod_producto%type;
+begin
+
+ select nif into nif_cli from clientes
+ where nombre = :old.cliente;
+
+ select cod_producto into cod_pro from productos
+ where descripcion = :old.desc_producto;
+
+ delete from ventas
+ where nif = nif_cli and cod_producto = cod_pro and fecha = :old.fecha_venta;
+end t3_2;
+
+drop trigger t3_2;
+
+--3_3
+create or replace trigger t3_3
+instead of update on v3
+for each row
+declare
+ nif_cli clientes.nif%type;
+ cod_pro productos.cod_producto%type;
+begin
+
+ select nif into nif_cli from clientes
+ where nombre = :new.cliente;
+
+ select cod_producto into cod_pro from productos
+ where descripcion = :new.desc_producto;
+
+ update ventas
+ set unidades = :new.unidades
+ where nif = nif_cli and cod_producto = cod_pro and fecha = :new.fecha_venta;
+
+end t3_3;
+
+drop trigger t3_3;
+
+--3_4
+create or replace trigger t3_4
+instead of delete on v3
+declare
+ nif_cli clientes.nif%type;
+begin
+
+ select nif into nif_cli from clientes
+ where nombre = :old.cliente;
+
+ delete from ventas
+ where nif = nif_cli;
+end t3_4;
+
+drop trigger t3_4;
+
+--3_5
+create or replace trigger t3_5
+instead of delete on v3
+declare
+ cod_pro productos.cod_producto%type;
+begin
+
+ select cod_producto into cod_pro from productos
+ where descripcion = :old.desc_producto;
+
+ delete from ventas
+ where cod_producto = cod_pro;
+end t3_5;
+
+--4
+create table registros(
+ usuario varchar2(20),
+ hora varchar2(5),
+ ent_sal varchar2(10)
+);
+
+create or replace trigger t5_1
+after logon on schema
+begin
+ insert into registros values (user, to_char(sysdate, 'HH24:MI'), 'Entrada');
+end;
+
+create or replace trigger t5_2
+before logoff on schema
+begin
+ insert into registros values (user, to_char(sysdate, 'HH24:MI'), 'Salida');
+end;
