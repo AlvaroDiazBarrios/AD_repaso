@@ -55,3 +55,51 @@ end;
 
 Donde los eventos pueden ser los siguientes:
 ver página 316 del libro, 317 del pdf
+
+* Resgistros y Colecciones
+
+** Registros
+Los registros son los 'objetos' de sql. Se definen de manera genérica de la siguiente manera:
+
+type *nombre tipo* is record(
+ nombre_campo1 tipo_campo1 [ [not null] {:= | default} valor_inicial1],
+ nombre_campo2 tipo_campo2 [ [not null] {:= | default} valor_inicial2],
+ ...
+ nombre_campoN tipo_campoN [ [not null] {:= | default} valor_inicialN],
+);
+
+Podemos inicializar variables del nuevo tipo de la siguiente manera:
+
+*nombre_variable nombre_tipo*;
+
+Podemos anidar registros dentro de registros
+y accederemos a los campos del segundo registro con el .
+
+** Colecciones
+Son estructuras compuestas por listas de elementos. Hay tres tipos de colecciones:
+- Varrays.
+- Tablas anidadas
+- Tablas indexadas (listas dinámicas)
+
+*** Varrays
+Equivalentes a los arrays de programación. Para poder usarlos debemos:
+1. Definir el tipo:
+   type *nombre_tipovarray* is varrat (numElementos) of tipoElementos [not null];
+2. Declarar variables de ese tipo:
+   nombre_variable nombre_tipovarray;
+3. Inicializar la variable:
+   - En la misma declaración de la variable según el formato:
+     nombre_variable nombre_tipovarray := nombre_tipovarray(lista_valores);
+   - En la zona ejecutable haciendo asignaciones individuales:
+     nombre_variable := nombre_tipovarray.
+4. Para hacer referencia a los elementos lo hacemos de la siguiente manera:
+   nombre_variable(numElemento); *OJO QUE EMPIEZAN EN 1*
+
+*** Tablas anidades
+Son como las Varrays pero _no tienen logitud fija_. Para crearlas:
+1. Definimos el tipo:
+   type nombre_tipoTablaAnidada is table of tipoElementos [not null];
+2. Declaramos e iicializamos las variables:
+   nombre_variable := nombre_tipoTablaAnidada();
+3. Añadirmos nuevas filas usando el método extend de la siguiente forma:
+   nombre_variable.extend;
