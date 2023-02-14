@@ -302,3 +302,57 @@ create or replace package body gest_emple as
 end gest_emple;
 
 --2
+create or replace package pq_provincias as
+
+ function provincia (v_mat provincias.mat%type) return provincias.prov%type;
+ function matricula (v_prov provincias.prov%type) return provincias.mat%type;
+ function codigoPost (v_prov provincias.prov%type) return provincias.cp%type;
+ procedure borrarProv;
+
+end pq_provincia;
+
+create or replace package body pq_provincias as
+ cursor c1 is
+  select * from provincias;
+ type tb_provincias is table of provincias%rowtype;
+ v_provincias tb_provincias := tb_provincias();
+ i number;
+
+ function provincia (v_mat provincias.mat%type) return provincias.prov%type as
+ dato provincias.prov%type;
+ begin
+  select prov into dato from provincias
+  where mat = v_mat;
+
+  return dato;
+ end provincia;
+
+ function matricula (v_prov provincias.prov%type) return provincias.mat%type as
+ dato provincias.mat%type;
+ begin
+  select mat into dato from provincias
+  where prov = v_prov;
+  return dato;
+ end matricula;
+
+ function codigoPost (v_prov provincias.prov%type) return provincias.cp%type as
+ dato provincias.cp%type;
+ begin
+  select cp into dato from provincias
+  where prov = v_prov;
+  return dato;
+ end codigoPost;
+
+ procedure borrarProv as
+ begin
+  v_provincias.delete;
+ end borrarProv;
+
+ begin
+  i := 1;
+  for v1 in c1 loop
+   v_provincias.extend;
+   v_provincias(i) := v1;
+   i := i + 1;
+  end loop;
+end pq_provincias;
