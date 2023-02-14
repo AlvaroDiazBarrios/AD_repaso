@@ -84,7 +84,7 @@ Son estructuras compuestas por listas de elementos. Hay tres tipos de coleccione
 *** Varrays
 Equivalentes a los arrays de programación. Para poder usarlos debemos:
 1. Definir el tipo:
-   type *nombre_tipovarray* is varrat (numElementos) of tipoElementos [not null];
+   type nombre_tipovarray is varrat (numElementos) of tipoElementos [not null];
 2. Declarar variables de ese tipo:
    nombre_variable nombre_tipovarray;
 3. Inicializar la variable:
@@ -100,6 +100,69 @@ Son como las Varrays pero _no tienen logitud fija_. Para crearlas:
 1. Definimos el tipo:
    type nombre_tipoTablaAnidada is table of tipoElementos [not null];
 2. Declaramos e iicializamos las variables:
-   nombre_variable := nombre_tipoTablaAnidada();
+   nombre_variable nombre_tipoTablaAnidada := nombre_tipoTablaAnidada();
 3. Añadirmos nuevas filas usando el método extend de la siguiente forma:
    nombre_variable.extend;
+
+*** Tablas indexadas
+Son como las *Tablas anidadas* pero tienen diferencias importantes:
+- No pueden usarse en tablas de la base de datos.
+- No pueden manipularse con comandos SQL, sólo con Pl/SQL
+- No son objetos
+- *No tienen una longitud predeterminada*
+- *No requieren inicialización*
+- *Todos los elementos se crean dinámicamente*
+- *El índice no es secuencial (Como en los diccionarios) y suelen ser de tipo binary_integer*
+
+  Las operaciones que podemos usar estas tablas son:
+  1. Definir el tipo de la tabla:
+     type nombre_tipoTabla is table of tipo_elementos [not null] index by [pls_integer | binary_integer | varchar2(longitud)];
+
+  2. Declarar variables:
+     nombreVariable nombre_tipoTabla;
+
+  3. Hacer referencia a los elementos usando el índice:
+     nombreVariable(indice)
+*** Atributos de colecciones PL/SQL
+- first: devuelve el valor de la clave o índice del primer elemento de una tabla:
+  variableTabla.first
+- last: devuelve el valor de la clave o índice del último elemento de una tabla:
+  variableTabla.last
+- prior: devuelve el valor de la clave o índice del elemento anterior al elemento n:
+  variableTabla.prior(n)
+- next: devuelve el valor de la clave o índice del elemento anterior al elemento n:
+  variableTabla.next(n)
+- count: devuelve el número de filas de una tabla:
+  variableTabla.count
+- exist: devuelve true si el elemento n existe dentro de la tabla, false en caso contrario:
+  variableTabla.exist(n)
+- delete: se usa para borrar elementos de la tabla:
+  variableTabla.delete -> borra todos los elementos de la tabla
+  variableTabla.delete(n) -> borra el elemento n de la tabla
+  variableTabla.delete(n¹, n²) -> borra las filas comprendidas entre los elementos n¹ y n² siendo n¹>= n².
+- extend: reserva espacio para un nuevo elemento (varray y tablas anidadas)
+  variableTabla.extend
+  variableTabla.extend(numeroElementos)
+- trim: elimina el último elemento (varray y tablas anidadas)
+  variableTabla.trim
+  variableTabla.trim(numeroElementos)
+- limit: devuelve el valor más alto permitido en un varray
+  variableTabla.limit
+* Paquetes
+
+** Creación de un paquete
+Hay que crear los paquetes en dos pasos, primero la cabecera y luego el cuerpo. Para crear la cabecera lo hacemos de la siguiente forma:
+
+create [or replace] package nombrePaquete as
+<declaraciones de tipos, variables, cursores, excepciones y otros *objetos públicos*>
+<especificaciones de subprogramas>
+end [nombrePaquete];
+
+Para la creación del cuerpo del paquete lo hacemos de la siguiente forma:
+
+create [or replace] package body nombrePaquete as
+<declaraciones de tipos, variables, cursores, excepciones y otros *objetos privados*>
+<cuerpo de los subprogramas>
+[begin
+ <instrucciones iniciales>
+end [nombrePaquete]];
