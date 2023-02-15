@@ -54,7 +54,7 @@ begin
   select count(*) into existe from depart
   where dept_no = :new.dept_no;
 
-  if existe == 0 then
+  if existe = 0 then
    raise_application_error(-20001, 'El departamento no existe');
   end if;
 
@@ -64,7 +64,7 @@ begin
   select count(*) into existe from depart
   where dept_no = :old.dept_no;
 
-  if existe == 0 then
+  if existe = 0 then
    raise_application_error(-20001, 'El departamento no existe');
   end if;
 

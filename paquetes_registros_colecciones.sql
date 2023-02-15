@@ -356,3 +356,132 @@ create or replace package body pq_provincias as
    i := i + 1;
   end loop;
 end pq_provincias;
+
+---Boletín 8---
+
+--1
+create table auditoria (
+ dato varchar2(50);
+);
+
+create or replace package pk1 as
+ veces number;
+end pk1;
+
+create or replace trigger t1 
+before insert or update or delete on emple
+begin
+ pk1.veces := 0;
+end t1;
+
+create or replace trigger t2 
+after insert or update or delete on emple
+begin
+ pk1.veces := pk1.veces + 1;
+end;
+
+create or replace trigger t3 
+after insert or update or delete on emple
+begin
+ if inserting then
+  insert into auditoria values ('Se han insertado ' || pk1.veces || ' filas');
+ elsif updating then
+  insert into auditoria values ('Se han actualizado ' || pk1.veces || ' filas');
+ else
+  insert into auditoria values ('Se han borrado ' || pk1.veces || ' filas');
+ end if;
+end t3;
+
+--2
+create or replace package pk2 as
+ v_empNo emple.emp_no%type;
+end pk2;
+
+create or replace trigger t1
+before delete on emple
+begin
+ pk2.v_empNo := 0;
+end;
+
+create or replace trigger t2
+after delete on emple
+for each row
+begin
+ pk2.v_empNo := :old.emp_no;
+end;
+
+create or replacer trigger t3
+after delete on emple
+begin
+ update emple
+ set dir = null
+ where dir = pk2.v_empNo;
+end;
+
+--3
+create or replace package pk3 as
+ v_deptNo depart.dept_no%type;
+ v_deptNoN depart.dept_no%type;
+end pk3;
+
+create or replace trigger t1
+before update on depart
+begin
+ pk3.v_deptNo := 0;
+ pk3.v_deptNoN := 0;
+end;
+
+create or replace trigger t2
+after update on depart
+for each row
+begin
+ pk3.v_deptNo := :old.dept_no;
+ pk3.v_deptNoN := :new.dept_no;
+end;
+
+create or replace trigger t3
+after update on depart
+begin
+ dbms_output.put_line(pk3.v_deptNo || ' ' || pk3.v_deptNoN);
+ update emple
+ set dept_no = pk3.v_deptNoN
+ where dept_no = pk3.v_deptNo;
+end;
+
+--4
+alter table depart
+add media_salario number;
+
+create or replace package pk4 as
+ avg_sal number;
+ v_deptNo depart.dept_no%type;
+end pk4;
+
+create or replace trigger t1
+before insert or update or delete on emple
+begin
+ pk4.avg_sal := 0;
+ pk4.v_deptNo := 0;
+end;
+
+create or replace trigger t2
+after insert or update or delete on emple
+for each row
+begin
+ if inserting or updating then
+  pk4.v_deptNo := :new.dept_no;
+ else
+  pk4.v_deptNo := :old.dept_no;
+ end if;
+end;
+
+create or replace trigger t3
+after insert or update or delete on emple
+begin
+ select avg(salario) into pk4.avg_sal from emple
+ where dept_no = pk4.v_deptNo;
+
+ update depart
+ set media_salario = avg_sal
+ where dept_no = pk4.dept_no;
+end;
